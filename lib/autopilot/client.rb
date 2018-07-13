@@ -48,7 +48,7 @@ module Autopilot
       when 200, 201, 202
         begin
           return Utils.symbolize_keys(JSON.load(response.body)) unless response.body.eq? ''
-        rescue JSON::ParserError
+        rescue StandardError
           return {}
         end
       when 401

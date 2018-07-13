@@ -17,7 +17,7 @@ module Autopilot
       perform_request(:post, path, params)
     end
 
-  private
+    private
 
     def perform_request(method, path, params)
       uri = prepare_uri(path)
@@ -46,7 +46,11 @@ module Autopilot
     def handle_json_response(response)
       case response.status_code
       when 200, 201, 202
-        Utils.symbolize_keys(JSON.load(response.body))
+        begin
+          return Utils.symbolize_keys(JSON.load(response.body)) unless response.body.eq? ''
+        rescue JSON::ParserError
+          return {}
+        end
       when 401
         raise AuthenticationError, response
       when 406
@@ -62,9 +66,9 @@ module Autopilot
 
     def default_headers
       @default_headers ||= {
-        # 'Authorization' => "Bearer #{@api_key}",
-        'autopilotapikey' => "#{@api_key}",
-        'User-Agent' => "Autopilot RubyGem #{Autopilot::VERSION}"
+          # 'Authorization' => "Bearer #{@api_key}",
+          'autopilotapikey' => "#{@api_key}",
+          'User-Agent' => "Autopilot RubyGem #{Autopilot::VERSION}"
       }.freeze
     end
   end
